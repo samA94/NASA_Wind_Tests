@@ -1,3 +1,9 @@
+import rospy
+from geometry_msgs.msg import Twist, PoseWithCovariance
+from mavros_msgs.srv import CommandBool, SetMode, StreamRate
+from mavros_msgs.msg import GlobalPositionTarget
+import time
+
 def set_Waypoint(read_Position, travel_Height, travel_Direction, travel_Distance, velocity):
 
     if target_Distance < 0.002:
@@ -51,13 +57,13 @@ def has_Reached_Position(Target_Position, read_Position):
     distance_to_Lon = lon - final_Target_Position[1]
     distance_to_alt = alt - final_Target_Position[2]
 
-    if alt > 0.95 * final_Target_Position and distance_to_Lat < 0.0001 and distance_to_Lon < 0.0001:
+    if alt > 0.95 * final_Target_Position[2] and distance_to_Lat < 0.0001 and distance_to_Lon < 0.0001:
         return True
     else:
         return False
 
 
-def quad_Command(mode, armVar = False):
+def quad_Command(mode, armVar):
     #initialize topics for arming quad
     rospy.wait_for_service("mavros/cmd/arming")
     armQuad = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)

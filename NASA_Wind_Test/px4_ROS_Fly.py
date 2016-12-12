@@ -16,7 +16,6 @@ setRate(0, 50, 1)
 rospy.Rate(50.0)
 
 global read_Position
-global max_Height
 
 
 def position_callback(GPS_Position_From_Quad):
@@ -27,9 +26,7 @@ def position_callback(GPS_Position_From_Quad):
 
 def main():
     global read_Position
-    global max_Height, ground_Level
 
-    turn_Target_Location = GlobalPositionTarget
 
     #Take target location inputs
     target_Direction = input("Please enter whether you would rather initially travel
@@ -44,11 +41,14 @@ def main():
     travel_Velocity = input("Enter the desired travel velocity in m/s, in [forward, left, up] coordinates")
 
 
+    rospy.Subscriber("/mavros/global_position/global", PoseWithCovariance,
+        position_callback)
+
     mode_List = [0, "OFFBOARD"]
     quad_Command(mode_List, True)
 
-    rospy.Subscriber("/mavros/global_position/global", PoseWithCovariance,
-        read_Position)
+    #Set home position
+    home_Position = read_Position
 
     #Assign tuple with maximum allowable altitude
     max_Height = (read_Position.altitude + 50,)
@@ -61,14 +61,14 @@ def main():
     waypoint2 = PositionTarget()
 
     #take off to requested height
-    if target_Height < max_Height[0]:
+    if target_Height+ground_Level < max_Height[0]:
         check = False
         while check==False:
-            check = takeoff(target_Height, pub_Position, read_Position)
+            check = takeoff(target_Height+ground_Level, pub_Position, read_Position)
             time.sleep(0.2)
 
     #set the first waypoint location and velocity
-    waypoint1 = set_Waypoint(read_Position, travel_Height, travel_Direction,
+    waypoint1 = set_Waypoint(read_Position, travel_Height+ground_Level, travel_Direction,
             travel_Distance, travel_Velocity)
 
     #publish waypoint
@@ -78,7 +78,7 @@ def main():
         #resend the waypoint and check to see if the quad has
         #reached the target position.  Break if it has reach target position
 
-        if has_Reached_Position(turn_Target_Location, read_Position) == True:
+        if has_Reached_Position(final_Target_Position, read_Position) == True:
             #Check to see if final position has been reached
             break
 
@@ -87,7 +87,7 @@ def main():
             time.sleep(0.1)
 
     #Set turn waypoint
-    waypoint2 = set_Waypoint(read_Position, travel_Height, turn_Direction,
+    waypoint2 = set_Waypoint(read_Position, travel_Height+ground_Level, turn_Direction,
             turn_Distance, travel_Velocity)
 
     start_Time = time.time()
@@ -96,7 +96,21 @@ def main():
         pub.publish(waypoint2)
         time.sleep(0.1)
 
+    #publish home waypoint
+    home_Waypoint.latitude = home_Position.latitude
+    home_Waypoint.longitude = home_Position.longitude
+    home_Waypoint.altitude = travel_Height+ground_Level
     
+
+
+    #land
+
+
+
+    #disarm
+
+
+
 
 
 
