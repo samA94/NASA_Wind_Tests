@@ -5,6 +5,8 @@ from mavros_msgs.msg import GlobalPositionTarget
 import time
 import sys
 
+from basicCommands import set_Waypoint, has_Reached_Position, quad_Command, takeoff
+
 rospy.init_node("send_Waypoints")
 
 rospy.wait_for_service("mavros/set_stream_rate")
@@ -14,70 +16,13 @@ setRate(0, 50, 1)
 rospy.Rate(50.0)
 
 global read_Position
-
 global max_Height
-
-def quad_Command(mode, armVar = False):
-    #initialize topics for arming quad
-    rospy.wait_for_service("mavros/cmd/arming")
-    armQuad = rospy.ServiceProxy("mavros/cmd/arming", CommandBool)
-    rospy.wait_for_service("mavros/set_mode")
-    modeSet = rospy.ServiceProxy("mavros/set_mode", SetMode) 
-
-    #arm quadrotor and initialize proper mode
-
-    armQuad(armVar)
-    print "System Arm Status: ", armVar
-    time.sleep(3)
-
-    modeSet(mode[0], mode[1])
-    print "Mode set to: ", mode
 
 
 def position_callback(GPS_Position_From_Quad):
     #function to get the position of the quad
     global read_Position
     read_Position = GPS_Position_From_Quad
-
-def takeoff(height, pub_Position):
-    #quadrotor takeoff to desired height
-    global read_Position
-
-    initial_height_Target = GlobalPositionTarget()
-
-    current_Lat = read_Position.latitude
-    current_Lon = read_Position.longitude
-
-    while read_Position.altitude < 0.95 * height:
-        initial_height_Target.altitude = height
-        initial_height_Target.latitude = current_Lat
-        initial_height_Target.longitude = current_Lon
-        initial_height_Target.velocity.x = 0
-        initial_height_Target.velocity.y = 0
-        initial_height_Target.velocity.z = 1
-
-        print "The current height is: " + read_Position.altitude
-        pub_Position.publish(initial_height_Target)
-        time.sleep(0.5)
-
-
-
-def has_Reached_Position(Target_Position):
-    #function to check if the quad has reached the target position
-    global read_Position
-
-    lat = read_Position.latitude
-    lon = read_Position.longitude
-    alt = read_Position.altitude
-
-    distance_to_Lat = lat - final_Target_Position[0]
-    distance_to_Lon = lon - final_Target_Position[1]
-    distance_to_alt = alt - final_Target_Position[2]
-
-    if alt > 0.95 * final_Target_Position and distance_to_Lat < 0.00001 and distance_to_Lon < 0.00001:
-        return True
-    else:
-        return False
 
 
 def main():
@@ -111,42 +56,47 @@ def main():
     
     pub_Position = rospy.Publisher("/mavros/setpoint_raw/local", PositionTarget, queue_size = 10)
     
-    
+    #initialize waypoints
     waypoint1 = PositionTarget()
-    waypoint1.
+    waypoint2 = PositionTarget()
 
-
+    #take off to requested height
     if target_Height < max_Height[0]:
-        takeoff(target_Height)
+        check = False
+        while check==False:
+            check = takeoff(target_Height, pub_Position, read_Position)
+            time.sleep(0.2)
 
-    if target_Distance < 0.0011:
-        pub_Position.publish(
-
-    #Set waypoint in direction specified
-
-
+    #set the first waypoint location and velocity
+    waypoint1 = set_Waypoint(read_Position, travel_Height, travel_Direction,
+            travel_Distance, travel_Velocity)
 
     #publish waypoint
-
-
-
+    pub_Position.publish(waypoint1)
 
     while True:
         #resend the waypoint and check to see if the quad has
         #reached the target position.  Break if it has reach target position
 
-        if has_Reached_Position(turn_Target_Location) == True:
+        if has_Reached_Position(turn_Target_Location, read_Position) == True:
             #Check to see if final position has been reached
             break
 
         else:
-            pub_Position(turn_Target_Location)
+            pub_Position.publish(waypoint1)
+            time.sleep(0.1)
 
+    #Set turn waypoint
+    waypoint2 = set_Waypoint(read_Position, travel_Height, turn_Direction,
+            turn_Distance, travel_Velocity)
 
+    start_Time = time.time()
 
+    while start_Time - time.time() < 5:
+        pub.publish(waypoint2)
+        time.sleep(0.1)
 
-
-
+    
 
 
 
