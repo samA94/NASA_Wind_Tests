@@ -6,6 +6,8 @@ import time
 
 def set_Waypoint(read_Position, travel_Height, travel_Direction, travel_Distance, velocity):
 
+    waypoint.coordinate_frame = 5
+
     if target_Distance < 0.002:
 
         waypoint.velocity.x = velocity[0]
@@ -16,13 +18,13 @@ def set_Waypoint(read_Position, travel_Height, travel_Direction, travel_Distance
             waypoint.latitude = read_Position.latitude + 0.001 + travel_Distance
             waypoint.longitude = read_Position.longitude
             waypoint.altitude = travel_Height
-            waypoint.yaw = 90
+            waypoint.yaw = 3.14/2
 
         elif target_Direction == 1:
             waypoint.latitude = read_Position.latitude - 0.001 - travel_Distance
             waypoint.longitude = read_Position.longitude
             waypoint.altitude = travel_Height
-            waypoint.yaw = 270
+            waypoint.yaw = 3.14*3/2
 
         elif target_Direction == 2:
             waypoint.longitude = read_Position.longitude + 0.001 + travel_Distance
@@ -34,7 +36,7 @@ def set_Waypoint(read_Position, travel_Height, travel_Direction, travel_Distance
             waypoint.longitude = read_Position.longitude - 0.001 - travel_Distance
             waypoint.latitude = read_Position.latitude
             waypoint.altitude = travel_Height
-            waypoint.yaw = 180
+            waypoint.yaw = 3.14
 
         else:
             print "Error"

@@ -47,7 +47,7 @@ def main():
     travel_Height = input("Enter the height you would like to travel at, in meters")
 
     turn_Direction = input("Enter the direction you would like to turn in, using the above format")
-    turn_Distance = input("Enter the time you would like to travel in this direction, in seconds")
+    turn_Travel_Time = input("Enter the time you would like to travel in this direction, in seconds")
 
     initial_Travel_Velocity = input("Enter the desired travel velocity in m/s, in
             [North_vel, East_vel, Down_vel, yaw_rate] coordinates")
@@ -61,7 +61,7 @@ def main():
 
     print "The position for the turn location has been set as: ", final_Target_Position
 
-    pub_Position = rospy.Publisher("/mavros/setpoint_raw/local", PositionTarget, queue_size = 10)
+    pub_Position = rospy.Publisher("/mavros/setpoint_raw/global", PositionTarget, queue_size = 10)
     
     #initialize waypoints
     waypoint1 = PositionTarget()
@@ -69,14 +69,16 @@ def main():
 
     dummyVar = input("Press enter after the quad has been armed, set to OFFBOARD mode, and has taken off.")
 
+    takeoff_Waypoint = waypoint(home_Position, travel_Height+ground_Level, target_Direction,
+                -0.001, [0,0,0,travel_velocity[3]])
+
     #take off to requested height
     while read_Position.altitude - ground_Level < 0.95 * travel_Height:
-        takeoff_Waypoint = waypoint(home_Position, travel_Height+ground_Level, target_Direction,
-                -0.001, [0,0,0,travel_velocity[3]])
         pub_Position.publish(takeoff_Waypoint)
         time.sleep(0.4)
         print "Taking off.  The height is: " read_Position.altitude - ground_Level       
 
+    print "The desired height has been reached: ", read_Position.altitude - ground_Level
 
     #set the first waypoint location and velocity
     waypoint1 = set_Waypoint(home_Position, travel_Height+ground_Level, travel_Direction,
@@ -105,8 +107,8 @@ def main():
 
     start_Time = time.time()
     #Published the turn
-    while start_Time - time.time() < 5:
-        pub.publish(waypoint2)
+    while time.time() - start_Time < turn_Travel_Time:
+        pub_Position.publish(waypoint2)
         print "The current location is: ", read_Position
         time.sleep(0.4)
     
@@ -114,6 +116,9 @@ def main():
     print "The destination has been reached.  Please use the return to launch feature on 
            the controller or on your ground control station"
 
+    end_Waypoint = waypoint(read_Position, travel_Height+ground_Level, turn_Direction,
+                -0.001, [0,0,0,travel_velocity[3]])
+    pub_Position.publish(end_Waypoint)
 
 if __name__ == '__main__':
     main()
@@ -126,15 +131,14 @@ if __name__ == '__main__':
 
 #Assuming NED conventions.  However, this is not explicitly stated in documentation
 
-#Yaw is not explained in documentation.  Currently assuming degrees, but might need to be changed
+#Yaw is not explained in documentation.  Currently assuming radians, but might need to be changed
 #Also, no explanation of yaw mechanics is given - does it stop and turn, or turn while flying?
 
 #Velocities have similar issues.  Assumed to be global, but they could be local
 
-#Should put the send waypoint and check location into a function for easier access
 #Could automate arming, mode set, and takeoff, but would not be as safe or controllable
 #Might be useful to have ROS automatically send quad home, but don't currently see a RTL function in mavros
 
-
+#Information was gathered from mavros msg documentation, ROS standards, and mavlink msg documentation
 
 
