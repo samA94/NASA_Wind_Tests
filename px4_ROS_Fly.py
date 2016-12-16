@@ -17,12 +17,19 @@ rospy.Rate(50.0)
 
 global read_Position
 
+filename = input("Please enter the desired file name, with the extension.")
+
+pos_File = open(filename, 'w')
 
 def position_callback(GPS_Position_From_Quad):
     #function to get the position of the quad
     global read_Position
     read_Position = GPS_Position_From_Quad
 
+    with open(filename, 'w') as pos_File:
+        pos_File.write(read_Position.latitude + ',')
+        pos_File.write(read_Position.longitude + ',')
+        pos_File.write(read_Position.altitude + '\n')
 
 def main():
     global read_Position
