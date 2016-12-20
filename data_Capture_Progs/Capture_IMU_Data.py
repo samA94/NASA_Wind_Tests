@@ -11,11 +11,11 @@ imu_data = Imu()
 
 #filename = raw_input("Please enter the desired file name, with the extension.")
 
-filename = "IMU_Data1.txt"
+filename = "data/IMU_Data1.txt"
 i=1
 while os.path.isfile(filename):
     i = i + 1
-    filename = filename[:8] + str(i) + '.txt'
+    filename = filename[:13] + str(i) + '.txt'
 
 
 pos_File = open(filename, 'w')
@@ -31,7 +31,10 @@ def callback(data):
     pos_File.write(timestamp + ',')
     pos_File.write(str(imu_data.linear_acceleration.x) + ',')
     pos_File.write(str(imu_data.linear_acceleration.y) + ',')
-    pos_File.write(str(imu_data.linear_acceleration.z) + '\n')
+    pos_File.write(str(imu_data.linear_acceleration.z) + ',')
+    pos_File.write(str(imu_data.angular_acceleration.x) + ',')
+    pos_File.write(str(imu_data.angular_acceleration.y) + ',')
+    pos_File.write(str(imu_data.angular_acceleration.z) + '\n')
     pos_File.flush()
 
 rospy.Subscriber("/imu/data_raw", Imu, callback)
