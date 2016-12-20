@@ -32,9 +32,9 @@ def callback(data):
     pos_File.write(str(imu_data.linear_acceleration.x) + ',')
     pos_File.write(str(imu_data.linear_acceleration.y) + ',')
     pos_File.write(str(imu_data.linear_acceleration.z) + ',')
-    pos_File.write(str(imu_data.angular_acceleration.x) + ',')
-    pos_File.write(str(imu_data.angular_acceleration.y) + ',')
-    pos_File.write(str(imu_data.angular_acceleration.z) + '\n')
+    pos_File.write(str(imu_data.angular_velocity.x) + ',')
+    pos_File.write(str(imu_data.angular_velocity.y) + ',')
+    pos_File.write(str(imu_data.angular_velocity.z) + '\n')
     pos_File.flush()
 
 rospy.Subscriber("/imu/data_raw", Imu, callback)
