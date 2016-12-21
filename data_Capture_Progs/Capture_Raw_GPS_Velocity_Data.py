@@ -23,7 +23,7 @@ pos_File.write('Raw GPS Position Onboard Data Storage' + '\n')
 def callback(data):
     global pos_File
 
-    timestamp = float(imu_data.header.stamp.secs) + float(imu_data.header.stamp.nsecs)/1000000000
+    timestamp = float(data.header.stamp.secs) + float(data.header.stamp.nsecs)/1000000000
     timestamp = repr(timestamp)
 
     pos_File.write(timestamp + ',')

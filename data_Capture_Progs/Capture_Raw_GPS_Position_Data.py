@@ -5,20 +5,20 @@ import os
 
 global pos_File
 
-rospy.init_node('fused_Position_Data_Capture')
+rospy.init_node('Raw_GPS_Position_Data_Capture')
 
 
 #filename = raw_input("Please enter the desired file name, with the extension.")
 
-filename = "data/fused_Position_Data1.txt"
+filename = "data/Raw_GPS_Position_Data1.txt"
 i=1
 while os.path.isfile(filename):
     i = i + 1
-    filename = filename[:24] + str(i) + '.txt'
+    filename = filename[:26] + str(i) + '.txt'
 
 
 pos_File = open(filename, 'w')
-pos_File.write('Fused Onboard Data Storage' + '\n')
+pos_File.write('Raw GPS Onboard Data Storage' + '\n')
 
 def callback(data):
     global pos_File
@@ -32,5 +32,5 @@ def callback(data):
     pos_File.write(str(data.altitude) + '\n')
     pos_File.flush()
 
-rospy.Subscriber("/mavros/global_position/global", NavSatFix, callback)
+rospy.Subscriber("/mavros/global_position/raw/fix", NavSatFix, callback)
 rospy.spin()

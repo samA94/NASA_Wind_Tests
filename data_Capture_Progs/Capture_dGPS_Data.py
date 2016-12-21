@@ -6,7 +6,7 @@ from geometry_msgs.msg import Twist, Pose
 import time
 import os
 
-global pos_File, imu_data
+global pos_File
 
 rospy.init_node('dGPS_Data_Capture')
 
@@ -33,7 +33,7 @@ def callback(glob_Pos, diff_Pos, gps_Time):
       + str(diff_Pos.twist.angular.z))
 
 
-    timestamp = float(imu_data.header.stamp.secs) + float(imu_data.header.stamp.nsecs)/1000000000
+    timestamp = float(data.header.stamp.secs) + float(data.header.stamp.nsecs)/1000000000
     timestamp = repr(timestamp)
 
     write_String = timestamp + write_String

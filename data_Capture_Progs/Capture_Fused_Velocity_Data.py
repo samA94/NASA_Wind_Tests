@@ -6,7 +6,7 @@ import os
 
 global pos_File
 
-rospy.init_node('fused_Data_Capture')
+rospy.init_node('fused_Velocity_Data_Capture')
 
 
 #filename = raw_input("Please enter the desired file name, with the extension.")
@@ -24,7 +24,7 @@ pos_File.write('Fused Onboard Data Storage' + '\n')
 def callback(data):
     global pos_File
 
-    timestamp = float(imu_data.header.stamp.secs) + float(imu_data.header.stamp.nsecs)/1000000000
+    timestamp = float(data.header.stamp.secs) + float(data.header.stamp.nsecs)/1000000000
     timestamp = repr(timestamp)
 
     pos_File.write(timestamp + ',')
