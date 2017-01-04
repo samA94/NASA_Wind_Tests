@@ -5,34 +5,41 @@ from mavros_msgs.msg import GlobalPositionTarget
 import time
 
 def set_Waypoint(read_Position, travel_Height, travel_Direction, travel_Distance, velocity):
+    waypoint = GlobalPositionTarget()
+    waypoint.coordinate_frame = GlobalPositionTarget.FRAME_GLOBAL_INT
 
-    waypoint.coordinate_frame = 5
+    travel_Direction = int(travel_Direction)
 
-    if target_Distance < 0.002:
+    waypoint.header.stamp = rospy.get_rostime()
+    waypoint.header.frame_id = "1"
+    waypoint.type_mask = 0b0001111111111111
+
+
+    if travel_Distance < 0.002:
 
         waypoint.velocity.x = velocity[0]
         waypoint.velocity.y = velocity[1]
         waypoint.velocity.z = velocity[2]
 
-        if target_Direction == 0:
+        if travel_Direction == 0:
             waypoint.latitude = read_Position.latitude + 0.001 + travel_Distance
             waypoint.longitude = read_Position.longitude
             waypoint.altitude = travel_Height
             waypoint.yaw = 3.14/2
 
-        elif target_Direction == 1:
+        elif travel_Direction == 1:
             waypoint.latitude = read_Position.latitude - 0.001 - travel_Distance
             waypoint.longitude = read_Position.longitude
             waypoint.altitude = travel_Height
             waypoint.yaw = 3.14*3/2
 
-        elif target_Direction == 2:
+        elif travel_Direction == 2:
             waypoint.longitude = read_Position.longitude + 0.001 + travel_Distance
             waypoint.latitude = read_Position.latitude
             waypoint.altitude = travel_Height
             waypoint.yaw = 0
 
-        elif target_Direction == 3:
+        elif travel_Direction == 3:
             waypoint.longitude = read_Position.longitude - 0.001 - travel_Distance
             waypoint.latitude = read_Position.latitude
             waypoint.altitude = travel_Height
@@ -42,7 +49,7 @@ def set_Waypoint(read_Position, travel_Height, travel_Direction, travel_Distance
             print "Error"
             waypoint.velocity.x = 0
             waypoint.velocity.y = 0
-            wayoint.velocity.z = 0
+            waypoint.velocity.z = 0
 
         return waypoint
 
