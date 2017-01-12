@@ -27,10 +27,10 @@ def callback(data):
     timestamp = repr(timestamp)
 
     pos_File.write(timestamp + ',')
-    pos_File.write(str(data.twist.linear.x) + ',')
-    pos_File.write(str(data.twist.linear.y) + ',')
-    pos_File.write(str(data.twist.linear.z) + ',')
-    pos_File.write(str(data.twist.angular.z) + '\n')
+    pos_File.write(str(data.linear.x) + ',')
+    pos_File.write(str(data.linear.y) + ',')
+    pos_File.write(str(data.linear.z) + ',')
+    pos_File.write(str(data.angular.z) + '\n')
     pos_File.flush()
 
 rospy.Subscriber("/mavros/global_position/raw/gps_vel", TwistStamped, callback)
