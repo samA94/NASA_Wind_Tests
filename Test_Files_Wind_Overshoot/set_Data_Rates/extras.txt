@@ -1,0 +1,6 @@
+#!nsh
+#
+# USB MAVLink start
+mavlink start -d /dev/ttyS1 -b 921600
+mavlink stream -d /dev/ttyS1 -s ATTITUDE -r 100
+mavlink stream -d /dev/ttyS1 -s HIGHRES_IMU -r 100
