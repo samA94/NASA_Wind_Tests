@@ -1,0 +1,38 @@
+import rospy
+from sensor_msgs.msg import NavSatFix
+from geometry_msgs.msg import TwistStamped
+import time
+import os
+
+global pos_File
+
+rospy.init_node('fused_Velocity_Data_Capture')
+
+
+#filename = raw_input("Please enter the desired file name, with the extension.")
+
+filename = "data/fused_Velocity_Data1.txt"
+i=1
+while os.path.isfile(filename):
+    i = i + 1
+    filename = filename[:24] + str(i) + '.txt'
+
+
+pos_File = open(filename, 'w')
+pos_File.write('Fused Onboard Data Storage' + '\n')
+
+def callback(data):
+    global pos_File
+
+    timestamp = float(data.header.stamp.secs) + float(data.header.stamp.nsecs)/1000000000
+    timestamp = repr(timestamp)
+
+    pos_File.write(timestamp + ',')
+    pos_File.write(str(data.twist.linear.x) + ',')
+    pos_File.write(str(data.twist.linear.y) + ',')
+    pos_File.write(str(data.twist.linear.z) + ',')
+    pos_File.write(str(data.twist.angular.z) + '\n')
+    pos_File.flush()
+
+rospy.Subscriber("/mavros/local_position/velocity", TwistStamped, callback)
+rospy.spin()
